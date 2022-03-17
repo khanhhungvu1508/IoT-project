@@ -1,0 +1,224 @@
+{
+  "ruleChain": {
+    "additionalInfo": {
+      "description": ""
+    },
+    "name": "IoT project",
+    "type": "CORE",
+    "firstRuleNodeId": null,
+    "root": false,
+    "debugMode": false,
+    "configuration": null
+  },
+  "metadata": {
+    "firstNodeIndex": 0,
+    "nodes": [
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 306,
+          "layoutY": 151
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbMsgTypeSwitchNode",
+        "name": "Message Type Switch",
+        "debugMode": false,
+        "configuration": {
+          "version": 0
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 46,
+          "layoutY": 334
+        },
+        "type": "org.thingsboard.rule.engine.action.TbLogNode",
+        "name": "Log Other Method msg",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "return 'Incoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 855,
+          "layoutY": 575
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbJsFilterNode",
+        "name": "Remove duplicate ts",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "var ts_temp = JSON.parse(metadata.temperature)[\"ts\"];\nvar ts_led = JSON.parse(metadata.led)[\"ts\"];\nvar ts_pump = JSON.parse(metadata.pump)[\"ts\"];\nreturn (ts_temp == ts_led || ts_temp == ts_pump);"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1179,
+          "layoutY": 518
+        },
+        "type": "org.thingsboard.rule.engine.rpc.TbSendRPCRequestNode",
+        "name": "RPC Call Info",
+        "debugMode": true,
+        "configuration": {
+          "timeoutInSeconds": 60
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 364,
+          "layoutY": 392
+        },
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "Upload Attribute",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "if (msgType == \"POST_ATTRIBUTES_REQUEST\")\n    return {msg: msg, metadata: metadata, msgType: msgType};\nelse\n{\n    var newMsg = {};\n    newMsg[msg.method] = (msg.params == \"false\")? false: true;\n    return {msg: newMsg, metadata: metadata, msgType: \"POST_ATTRIBUTES_REQUEST\"};\n}\nreturn {};"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 678,
+          "layoutY": 389
+        },
+        "type": "org.thingsboard.rule.engine.telemetry.TbMsgAttributesNode",
+        "name": "Save Client Attributes",
+        "debugMode": true,
+        "configuration": {
+          "scope": "CLIENT_SCOPE",
+          "notifyDevice": true
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 658,
+          "layoutY": 143
+        },
+        "type": "org.thingsboard.rule.engine.telemetry.TbMsgTimeseriesNode",
+        "name": "Save TimeSeries",
+        "debugMode": true,
+        "configuration": {
+          "defaultTTL": 0,
+          "skipLatestPersistence": false,
+          "useServerTs": false
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1162,
+          "layoutY": 401
+        },
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "RPC Device",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "var newMsg = {};\nvar timeSeries = Math.max(JSON.parse(metadata.temperature)[\"ts\"], JSON.parse(metadata.led)[\"ts\"]);\ntimeSeries = Math.max(timeSeries, JSON.parse(metadata.pump)[\"ts\"]);\nnewMsg[\"method\"] = \"getDevice\";\nnewMsg[\"params\"] = '{\"temperature\":' + JSON.parse(metadata.temperature)[\"value\"]\n                    + ',\"humidity\":' + JSON.parse(metadata.humidity)[\"value\"]\n                    + ',\"led\":' + JSON.parse(metadata.led)[\"value\"]\n                    + ',\"pump\":' + JSON.parse(metadata.pump)[\"value\"]\n                    + ',\"ts\":\"' + timeSeries\n                    + '\"}';\nreturn {msg: newMsg, metadata: metadata, msgType: \"TO_SERVER_RPC_REQUEST\"};"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1002,
+          "layoutY": 140
+        },
+        "type": "org.thingsboard.rule.engine.metadata.TbGetAttributesNode",
+        "name": "Get Device",
+        "debugMode": true,
+        "configuration": {
+          "tellFailureIfAbsent": true,
+          "clientAttributeNames": [],
+          "sharedAttributeNames": [],
+          "serverAttributeNames": [],
+          "latestTsKeyNames": [
+            "temperature",
+            "humidity",
+            "led",
+            "pump"
+          ],
+          "getLatestValueWithTs": true
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 665,
+          "layoutY": 236
+        },
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "Upload Telemetry",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "return {msg: msg, metadata: metadata, msgType: \"POST_TELEMETRY_REQUEST\"};"
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromIndex": 0,
+        "toIndex": 1,
+        "type": "Other"
+      },
+      {
+        "fromIndex": 0,
+        "toIndex": 4,
+        "type": "Post attributes"
+      },
+      {
+        "fromIndex": 0,
+        "toIndex": 4,
+        "type": "RPC Request to Device"
+      },
+      {
+        "fromIndex": 0,
+        "toIndex": 6,
+        "type": "Post telemetry"
+      },
+      {
+        "fromIndex": 2,
+        "toIndex": 7,
+        "type": "False"
+      },
+      {
+        "fromIndex": 2,
+        "toIndex": 1,
+        "type": "True"
+      },
+      {
+        "fromIndex": 4,
+        "toIndex": 5,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 5,
+        "toIndex": 9,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 6,
+        "toIndex": 8,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 7,
+        "toIndex": 3,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 8,
+        "toIndex": 2,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 9,
+        "toIndex": 6,
+        "type": "Success"
+      }
+    ],
+    "ruleChainConnections": null
+  }
+}
