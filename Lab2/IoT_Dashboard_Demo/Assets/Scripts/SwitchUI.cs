@@ -93,7 +93,7 @@ public class SwitchUI : MonoBehaviour
 		}
 	}
 	
-	public void toggleSwitchStateLED(int wantedState)
+	public void toggleSwitchState(int wantedState)
 	{
 		if (wantedState == 1)
 		{
@@ -122,38 +122,6 @@ public class SwitchUI : MonoBehaviour
 				bgImg.GetComponent<Image>().color = color;
 			}
 			//Login.instanceLogin.mqtt.PublishTopics("{\"led\": false}");
-		}
-	}
-	
-	public void toggleSwitchStatePump(int wantedState)
-	{
-		if (wantedState == 1)
-		{
-			if (switchState != 1)
-			{
-				switchBtn.transform.DOLocalMoveX(-switchBtn.transform.localPosition.x,0.2f);
-				switchState = Math.Sign(-switchBtn.transform.localPosition.x);
-				Color color = bgImg.GetComponent<Image>().color;
-				color.r = 0f/255f;
-				color.g = 127f/255f;
-				color.b = 234f/255f;
-				bgImg.GetComponent<Image>().color = color;
-			}
-			//Login.instanceLogin.mqtt.PublishTopics("{\"pump\": true}");
-		}
-		else if (wantedState == -1)
-		{
-			if (switchState != -1)
-			{
-				switchBtn.transform.DOLocalMoveX(-switchBtn.transform.localPosition.x,0.2f);
-				switchState = Math.Sign(-switchBtn.transform.localPosition.x);
-				Color color = bgImg.GetComponent<Image>().color;
-				color.r = 255f/255f;
-				color.g = 0f/255f;
-				color.b = 0f/255f;
-				bgImg.GetComponent<Image>().color = color;
-			}
-			//Login.instanceLogin.mqtt.PublishTopics("{\"pump\": false}");
 		}
 	}
 }

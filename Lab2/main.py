@@ -2,6 +2,7 @@ print("Hello Thingboard")
 import paho.mqtt.client as mqttclient
 import time
 import json
+'''
 import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -9,6 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
+'''
 
 BROKER_ADDRESS = "demo.thingsboard.io"
 PORT = 1883

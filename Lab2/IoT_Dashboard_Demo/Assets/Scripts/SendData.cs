@@ -90,6 +90,8 @@ public class SendData : MonoBehaviour
 						Debug.Log("Doing modified all!");
 						_temperature.text = dataDevice.param.temperature + "°C";
 						_humidity.text = dataDevice.param.humidity + "%";
+						_temperatureGauge.updateGauge(dataDevice.param.temperature);
+						_humidityGauge.updateGauge(dataDevice.param.humidity);
 						if (_led.getDirectionSending() == 0 &&
 							(dataDevice.param.led == false && _led.getSwitchState() == -1 || 
 							dataDevice.param.led == true && _led.getSwitchState() == 1))
@@ -116,17 +118,17 @@ public class SendData : MonoBehaviour
 							if (_led.getDirectionSending() == 1)
 							{
 								if (dataDevice.param.led == false)
-									_led.toggleSwitchStateLED(-1);
+									_led.toggleSwitchState(-1);
 								else
-									_led.toggleSwitchStateLED(1);
+									_led.toggleSwitchState(1);
 							}
 							
 							if (_pump.getDirectionSending() == 1)
 							{
 								if (dataDevice.param.pump == false)
-									_pump.toggleSwitchStatePump(-1);
+									_pump.toggleSwitchState(-1);
 								else
-									_pump.toggleSwitchStatePump(1);
+									_pump.toggleSwitchState(1);
 							}
 						}
 						tsGlobal = dataDevice.param.ts;
@@ -136,9 +138,9 @@ public class SendData : MonoBehaviour
 						Debug.Log("Doing modified only continouous data!");
 						_temperature.text = dataDevice.param.temperature + "°C";
 						_humidity.text = dataDevice.param.humidity + "%";
+						_temperatureGauge.updateGauge(dataDevice.param.temperature);
+						_humidityGauge.updateGauge(dataDevice.param.humidity);
 					}
-					_temperatureGauge.updateGauge(dataDevice.param.temperature);
-					_humidityGauge.updateGauge(dataDevice.param.humidity);
 					
 				}
 				prevMessageReceived = messageReceived;
